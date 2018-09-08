@@ -1,0 +1,7 @@
+{
+    "config" : {
+        "project_name" : "Name of your project",
+        "site_template_source" : "full directory of your dw site template path",
+        "build_suite_source" : "full directory of your dw build-suite installation"
+    }
+}
