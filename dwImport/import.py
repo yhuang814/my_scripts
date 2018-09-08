@@ -14,18 +14,24 @@ def copy_dir(src, dst):
 def remove_dir(path) : 
     shutil.rmtree(path)
 
-script_dir = os.path.dirname(os.path.realpath(__file__))
-fileName = script_dir + '/config.json'
+def get_config() : 
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    fileName = script_dir + '/config.json'
 
-#reads the file
-with open(fileName) as f:
-    data = json.load(f)
+    #reads the file
+    with open(fileName) as f:
+        data = json.load(f)
 
-config = data['config']
+    config = data['config']
 
-project_name = config['project_name']
-site_template_source = config['site_template_source']
-build_suite_source = config['build_suite_source']
+    return config
+
+config = get_config()
+
+project_name = config.get('project_name')
+site_template_source = config.get('site_template_source')
+build_suite_source = config.get('build_suite_source')
+
 build_suite_source_build_dir = build_suite_source + '/output' + '/' + project_name + '/site_import'
 
 source_dir = site_template_source + '/common'
@@ -46,4 +52,3 @@ if len(sys.argv) > 1 :
 os.system(os_command)
 
 remove_dir(build_suite_source_build_dir) #clean up dir when completed
-
