@@ -26,29 +26,51 @@ def get_config() :
 
     return config
 
+def is_template_allowed(template_type, allowed_types) : 
+    for allowed_type in allowed_types:
+        if template_type == allowed_type : 
+            return True
+    return False
+
+#determine the import type
+# if not specificed by user, use common import type
+def get_template_path() : 
+    if len(sys.argv) > 1 : 
+        if  is_template_allowed(sys.argv[1], config.get('site_template_paths')) : 
+            return sys.argv[1]
+        else : 
+            print("Invalid template type")
+            sys.exit()
+    else: 
+        template_path = 'common'
+    return template_path
+
+#retrieve data from config.json file
 config = get_config()
 
 project_name = config.get('project_name')
 site_template_source = config.get('site_template_source')
 build_suite_source = config.get('build_suite_source')
 
+#assemble required build directories
 build_suite_source_build_dir = build_suite_source + '/output' + '/' + project_name + '/site_import'
-
-source_dir = site_template_source + '/common'
 destination_dir = build_suite_source_build_dir + '/site_init'
+os_command = "grunt --base " + build_suite_source + " importSite"
+
+source_dir = site_template_source + '/' + get_template_path()
 
 #Verify if destination path exists, if yes > delete path
 if os.path.isdir(destination_dir) and os.path.exists(destination_dir) : 
     remove_dir(destination_dir)
 
+#copy site template files from project to import staging folder
 copy_dir(source_dir, destination_dir)
 
-os_command = "grunt --base " + build_suite_source + " importSite"
-
 #add project parameter from command line
-if len(sys.argv) > 1 : 
-    os_command = os_command + ' --project=' + sys.argv[1]
+if len(sys.argv) > 2 : 
+    os_command = os_command + ' --project=' + sys.argv[2]
 
+#execute grunt command to upload and import files
 os.system(os_command)
 
 remove_dir(build_suite_source_build_dir) #clean up dir when completed
