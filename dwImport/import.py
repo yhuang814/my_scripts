@@ -1,6 +1,7 @@
 import sys
 import json
 import shutil, errno, os
+import os.path
 
 #copies the file
 def copy_dir(src, dst):
@@ -45,6 +46,16 @@ def get_template_path() :
         template_path = 'common'
     return template_path
 
+def get_grunt_file_path() :
+    #check if file exist
+    grunt_file_path = build_suite_source + '/Gruntfile.js'
+    if(os.path.isfile(grunt_file_path)) : 
+        return grunt_file_path
+    else :
+        print('ERROR - ' + grunt_file_path + ' NOT FOUND!')
+        sys.exit()
+
+
 #retrieve data from config.json file
 config = get_config()
 
@@ -52,10 +63,12 @@ project_name = config.get('project_name')
 site_template_source = config.get('site_template_source')
 build_suite_source = config.get('build_suite_source')
 
+build_suite_grunt_file_path = get_grunt_file_path()
+
 #assemble required build directories
 build_suite_source_build_dir = build_suite_source + '/output' + '/' + project_name + '/site_import'
 destination_dir = build_suite_source_build_dir + '/site_init'
-os_command = "grunt --base " + build_suite_source + " importSite"
+os_command = "grunt --base " + build_suite_source + " --gruntfile " + build_suite_grunt_file_path + " importSite"
 
 source_dir = site_template_source + '/' + get_template_path()
 
