@@ -1,5 +1,3 @@
-from xml_mgr import Xml_Mgr
-
 import sys
 import json
 import shutil, errno, os
