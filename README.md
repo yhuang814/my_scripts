@@ -1,2 +1,2 @@
 # my_scripts
-Scripts for personal use.
+Scripts for personal use
