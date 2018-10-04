@@ -19,27 +19,26 @@ def get_repo_dir() :
         return config['repo_dir']
     return
 
-def get_ticket() : 
+def get_ticket_versions(ticket_id) : 
     config = get_config()
     jira_config = config['jira']
     username = jira_config['username']
     password = jira_config['password']
-    request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/CNV-3374"
-    resp = requests.get(request_url, auth=(username, password))
+    request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions";
+    response = requests.get(request_url, auth=(username, password))
 
-    if(resp.status_code == 200) :
-        resp_obj = json.load(resp.content)
-        return resp_obj
+    if(response.status_code == 200) :
+        response_obj = response.json()
+        return response_obj['fields']['fixVersions']
     return
 
-
 def main():
-    #repo_dir = get_repo_dir() 
-    #git_file = repo_dir + '/.git'
-    #os_command = 'git --git-dir ' + git_file + ' log'
-    #os_output = os.popen(os_command).read()
-    #git log --pretty="%ci","%h","%an","%s"    
-    print(get_ticket())
+    repo_dir = get_repo_dir() 
+    git_file = repo_dir + '/.git'
+
+    os_command = 'git --git-dir ' + git_file + ' log master..hotfix_0.17.2 --pretty=\"%ci\",\"%h\",\"%an\",\"%s\"'
+    os_output = os.popen(os_command).read()
+    print(os_output)
 
 if __name__ == '__main__':
     	main()
