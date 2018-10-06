@@ -1,6 +1,7 @@
 {
     "repo_dir" : "",
     "jira" : {
+        "base_url" : "",
         "username" : "",
         "password" : ""
     }
