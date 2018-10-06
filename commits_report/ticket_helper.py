@@ -1,4 +1,4 @@
-import re
+import re, os, json
 from jira_rest import Jira
 from config import Config
 
@@ -7,7 +7,19 @@ class Ticket_Helper :
         self.config = Config() #config class to provide config.json file data
         self.jira = Jira(self.config.get_jira_config())
         
+    def get_commits(self) :
+        os_command = []
+        os_command.append("git2json");
 
+        repo_dir = self.config.get_repo_dir() #--git-dir
+        if repo_dir : 
+            os_command.append("--git-dir=" + repo_dir + '/.git')
+        os_command.append("--compare=origin/master..origin/hotfix_0.17.2")
+        os_command = " ".join(os_command)
+        
+        os_output = os.popen(os_command).read()
+        commits = json.loads(os_output);
+        return commits
     def get_grouped_tickets(self, commits):
         ticket_list = {}
 

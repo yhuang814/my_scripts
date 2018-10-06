@@ -1,6 +1,5 @@
 import sys
-import json
-import shutil, errno, os
+import shutil, errno
 
 from csv_logger import Csv_Logger
 from prompt import Prompt
@@ -12,19 +11,7 @@ config = Config() #config class to provide config.json file data
 
 def main():
     ticket_helper = Ticket_Helper()
-
-    os_command = []
-    os_command.append("git2json");
-
-    repo_dir = config.get_repo_dir() #--git-dir
-    if repo_dir : 
-        os_command.append("--git-dir=" + repo_dir + '/.git')
-    os_command.append("--compare=origin/master..origin/hotfix_0.17.2")
-    os_command = " ".join(os_command)
-    
-    os_output = os.popen(os_command).read()
-    commits = json.loads(os_output);
-
+    commits = ticket_helper.get_commits()
     ticket_list = ticket_helper.get_grouped_tickets(commits)
     
     check_version = "0.17"
