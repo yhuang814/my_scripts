@@ -1,37 +1,16 @@
 import sys
 import json
 import shutil, errno, os
-import requests
+
 import re
 from csv_logger import Csv_Logger
 from prompt import Prompt
 from config import Config
+from jira_rest import Jira
 
 #global config
 config = Config() #config class to provide config.json file data
-
-def get_ticket_versions(ticket_id) :
-
-    jira_config = config.get_jira_config() 
-    username = jira_config['username']
-    password = jira_config['password']
-    request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions&fields=summary";
-    response = requests.get(request_url, auth=(username, password))
-
-    if(response.status_code == 200) :
-        response_obj = response.json()
-        response_fix_versions = response_obj['fields']['fixVersions']
-        
-        result = {
-            "summary" : response_obj['fields']['summary']
-        }
-        fix_versions = []
-        for version in response_fix_versions:
-            fix_versions.append(version['name'])
-        result["fix_versions"] = fix_versions
-        return result
-    else: 
-        return False
+jira = Jira(config.get_jira_config())
 
 def get_failed_tickets(ticket_list, check_version) :
     failed_tickets = {}
@@ -40,7 +19,7 @@ def get_failed_tickets(ticket_list, check_version) :
 
     for key in ticket_list: 
         ticket = ticket_list[key]
-        api_result = get_ticket_versions(key)
+        api_result = jira.get_ticket_versions(key)
         result = {}
         if api_result is False:
             result = {
