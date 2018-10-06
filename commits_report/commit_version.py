@@ -3,6 +3,7 @@ import json
 import shutil, errno, os
 import os.path
 import requests
+import re
 
 def get_config() : 
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -32,13 +33,40 @@ def get_ticket_versions(ticket_id) :
         return response_obj['fields']['fixVersions']
     return
 
-def main():
-    repo_dir = get_repo_dir() 
-    git_file = repo_dir + '/.git'
+#get JIRA ticket number from the commit message using regular expression
+def get_ticket_num(commit_message) : 
+    regex = r"((?!([A-Z0-9a-z]{1,10})-?$)[A-Z]{1}[A-Z0-9]+-\d+)"
+    matches = re.search(regex, commit_message)
+    
+    if matches:
+        return matches.groups()
+    
+    return
+        
 
-    os_command = 'git --git-dir ' + git_file + ' log master..hotfix_0.17.2 --pretty=\"%ci\",\"%h\",\"%an\",\"%s\"'
+def main():
+    os_command = []
+    os_command.append("git2json");
+
+    repo_dir = get_repo_dir() #--git-dir
+    if repo_dir : 
+        os_command.append("--git-dir=" + repo_dir + '/.git')
+    os_command.append("--compare=origin/master..origin/hotfix_0.17.2")
+    os_command = " ".join(os_command)
+    
     os_output = os.popen(os_command).read()
-    print(os_output)
+    commits = json.loads(os_output);
+
+    parsed_commits = []
+    
+    for commit in commits : 
+        d = {
+            "author" : commit['author']['name'],
+            "commit" : commit['commit'],
+            "message" : commit['message']
+        }
+        d["tickets"] = get_ticket_num(d['message'])
+        parsed_commits.append(d)
 
 if __name__ == '__main__':
     	main()
