@@ -1,8 +1,37 @@
-import requests
+import requests, json
 
 class Jira : 
     def __init__(self, jira_config):
         self.jira_config = jira_config
+
+    def update_ticket_version(self, ticket_id, version): 
+        jira_config = self.jira_config
+        username = jira_config['username']
+        password = jira_config['password']
+
+        request_url = "https://borngroup.atlassian.net/rest/api/2/issue/CNV-3481"
+        
+        body = {
+            "update": {
+                    "fixVersions": [{
+                        "add": {
+                            "name": "0.17.2"
+                        }
+                    }]
+                }
+        }
+
+        headers = {'Content-type': 'application/json'}
+        try:
+            response = requests.put(request_url, data=json.dumps(body), headers=headers, auth=(username, password))
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            print("lol" + e)
+            exit()
+
+        if(response.status_code == 204) :
+            return True
+        else : 
+            return False
 
     def get_ticket_versions(self, ticket_id) :
         jira_config = self.jira_config

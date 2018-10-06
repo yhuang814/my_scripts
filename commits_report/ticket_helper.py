@@ -7,14 +7,15 @@ class Ticket_Helper :
         self.config = Config() #config class to provide config.json file data
         self.jira = Jira(self.config.get_jira_config())
         
-    def get_commits(self) :
+    def get_commits(self, compare) :
         os_command = []
         os_command.append("git2json");
 
         repo_dir = self.config.get_repo_dir() #--git-dir
         if repo_dir : 
             os_command.append("--git-dir=" + repo_dir + '/.git')
-        os_command.append("--compare=origin/master..origin/hotfix_0.17.2")
+
+        os_command.append("--compare=" + compare)
         os_command = " ".join(os_command)
         
         os_output = os.popen(os_command).read()
@@ -95,3 +96,6 @@ class Ticket_Helper :
         print("TOTAL PASSED: " + str(len(ticket_list) - len(failed_tickets)))
         print("TOTAL FAILED: " + str(len(failed_tickets)))
         return failed_tickets
+    
+    def update_ticket(self, ticket_id, version) : 
+        return self.jira.update_ticket_version(ticket_id, version)

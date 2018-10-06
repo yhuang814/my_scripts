@@ -16,9 +16,8 @@ def prompt_handler(message) :
         print("Aborting operation....")
         exit()
 
-def main():
-    #test
-        
+def main():    
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -61,10 +60,11 @@ def main():
     prompt_handler("Please confirm the above.")
 
     check_version = args.version
-    ticket_helper = Ticket_Helper()
-    commits = ticket_helper.get_commits()
-    ticket_list = ticket_helper.get_grouped_tickets(commits)
 
+    ticket_helper = Ticket_Helper()
+    
+    commits = ticket_helper.get_commits(compare)
+    ticket_list = ticket_helper.get_grouped_tickets(commits)
     failed_tickets = ticket_helper.get_failed_tickets(ticket_list, check_version)
 
     print("=================================================================")
