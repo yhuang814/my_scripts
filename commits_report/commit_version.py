@@ -1,36 +1,18 @@
 import sys
 import json
 import shutil, errno, os
-import os.path
 import requests
 import re
 from csv_logger import Csv_Logger
 from prompt import Prompt
+from config import Config
 
-def get_config() : 
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    fileName = script_dir + '/config.json'
+#global config
+config = Config() #config class to provide config.json file data
 
-    #reads the file
-    with open(fileName) as f:
-        data = json.load(f)
-    return data
+def get_ticket_versions(ticket_id) :
 
-def get_repo_dir() :
-    config = get_config()
-    if config['repo_dir'] : 
-        return config['repo_dir']
-    return
-
-def get_base_url() :
-    config = get_config()
-    if config['jira']['base_url'] : 
-        return config['jira']['base_url']
-    return
-
-def get_ticket_versions(ticket_id) : 
-    config = get_config()
-    jira_config = config['jira']
+    jira_config = config.get_jira_config() 
     username = jira_config['username']
     password = jira_config['password']
     request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions&fields=summary";
@@ -134,7 +116,7 @@ def main():
     os_command = []
     os_command.append("git2json");
 
-    repo_dir = get_repo_dir() #--git-dir
+    repo_dir = config.get_repo_dir() #--git-dir
     if repo_dir : 
         os_command.append("--git-dir=" + repo_dir + '/.git')
     os_command.append("--compare=origin/master..origin/hotfix_0.17.2")
@@ -146,7 +128,7 @@ def main():
     ticket_list = get_grouped_tickets(commits)
     
     check_version = "0.17"
-    base_url = get_base_url()
+    base_url = config.get_base_url()
 
     failed_tickets = get_failed_tickets(ticket_list, check_version)
 
