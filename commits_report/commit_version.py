@@ -32,16 +32,21 @@ def get_ticket_versions(ticket_id) :
     jira_config = config['jira']
     username = jira_config['username']
     password = jira_config['password']
-    request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions";
+    request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions&fields=summary";
     response = requests.get(request_url, auth=(username, password))
 
     if(response.status_code == 200) :
         response_obj = response.json()
         response_fix_versions = response_obj['fields']['fixVersions']
+        
+        result = {
+            "summary" : response_obj['fields']['summary']
+        }
         fix_versions = []
         for version in response_fix_versions:
             fix_versions.append(version['name'])
-        return fix_versions
+        result["fix_versions"] = fix_versions
+        return result
     else: 
         return False
 
@@ -52,24 +57,25 @@ def get_failed_tickets(ticket_list, check_version) :
 
     for key in ticket_list: 
         ticket = ticket_list[key]
-        fix_versions = get_ticket_versions(key)
-
-        if fix_versions is False:
+        api_result = get_ticket_versions(key)
+        result = {}
+        if api_result is False:
             result = {
                 "success" : False,
                 "error" : True,
                 "message" : "ERROR"
             }
-        elif check_version in fix_versions :
+        elif "fix_versions" in api_result and check_version in api_result["fix_versions"] :
             result = {
                 "success" : True,
                 "message" : "PASSED"
             }
-        else : 
+        elif "fix_versions" in api_result and check_version not in api_result["fix_versions"]: 
             failed_tickets[key] = {
                 "data" : ticket,
                 "id" : key,
-                "versions" : " ".join(fix_versions)
+                "versions" : " ".join(api_result["fix_versions"]),
+                "summary" : api_result["summary"]
             } 
                 
             result = {
@@ -80,7 +86,7 @@ def get_failed_tickets(ticket_list, check_version) :
         if "error" in result and result["error"] is True:
             print(result["message"] + " - Ticket: " + key)
         else : 
-            print(result["message"] + " - Ticket: " + key + " - Versions: " + " ".join(fix_versions))
+            print(result["message"] + " - Ticket: " + key + " - Versions: " + " ".join(api_result["fix_versions"]))
     
     print("TOTAL PASSED: " + str(len(ticket_list) - len(failed_tickets)))
     print("TOTAL FAILED: " + str(len(failed_tickets)))

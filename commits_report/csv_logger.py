@@ -20,9 +20,9 @@ class Csv_Logger :
 
         with open(fileName, 'wb') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                                    quotechar=' ', quoting=csv.QUOTE_MINIMAL)
             #header
-            filewriter.writerow(['ticket', 'Current Versions', 'Version Added', 'Details'])
+            filewriter.writerow(['Ticket','Summary', 'Current Versions', 'Version Added', 'Details'])
 
             #content
             for ticket_key in tickets : 
@@ -34,7 +34,7 @@ class Csv_Logger :
         for commit in ticket["data"]:
             commits.append(commit["commit"] + " - " + commit["author"])
                     
-        filewriter.writerow( [ticket["id"], ticket["versions"], self.fix_version, ''])
+        filewriter.writerow( [ticket["id"], "\"" + ticket['summary'] + "\"", ticket["versions"], self.fix_version, ''])
 
     def make_directory(self, path):
         try:
