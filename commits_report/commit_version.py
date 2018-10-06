@@ -5,6 +5,7 @@ import os.path
 import requests
 import re
 from csv_logger import Csv_Logger
+from prompt import Prompt
 
 def get_config() : 
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -162,6 +163,10 @@ def main():
     
     csv_logger = Csv_Logger(check_version)
     csv_logger.log(failed_tickets)
+
+    prompt = Prompt()
+    prompt_result = prompt.confirm("Are you sure you want to update above tickets to fix version " + check_version)
+    print(prompt_result)
 
 if __name__ == '__main__':
     	main()
