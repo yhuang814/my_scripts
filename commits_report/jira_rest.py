@@ -10,8 +10,9 @@ class Jira :
         jira_config = self.jira_config
         username = jira_config['username']
         password = jira_config['password']
+        base_url = jira_config['base_url']
 
-        request_url = "https://borngroup.atlassian.net/rest/api/2/issue/" + ticket_id
+        request_url = base_url + "/rest/api/2/issue/" + ticket_id
 
         #test
         logger.log_print("Updating ticket " + ticket_id + " to version " + version + " ...")
@@ -46,7 +47,9 @@ class Jira :
         jira_config = self.jira_config
         username = jira_config['username']
         password = jira_config['password']
-        request_url = "https://borngroup.atlassian.net/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions&fields=summary";
+        base_url = jira_config['base_url']
+
+        request_url = base_url + "/rest/api/latest/issue/" + ticket_id + "?fields=fixVersions&fields=summary";
         response = requests.get(request_url, auth=(username, password))
 
         if(response.status_code == 200) :
