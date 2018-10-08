@@ -2,6 +2,9 @@ import csv
 import os.path
 from time import strftime
 import datetime
+from sys_logger import Sys_Logger
+
+logger = Sys_Logger()
 
 class Csv_Logger :
     
@@ -12,7 +15,7 @@ class Csv_Logger :
     #TODO: implement error handling
     def log(self) : 
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        log_dir = script_dir + '/logs'
+        log_dir = script_dir + '/reports'
 
         if not os.path.isdir(log_dir) : 
             self.make_directory(log_dir)
@@ -21,7 +24,7 @@ class Csv_Logger :
 
         fileName = log_dir + '/log_' + file_creation_timestamp + ".csv"
 
-        print("Creating csv log file...")
+        logger.log_print("Creating csv log file...")
 
         with open(fileName, 'wb') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_ALL)
@@ -31,7 +34,7 @@ class Csv_Logger :
             for item in self.write_items :
                 filewriter.writerow( [item["ticket_id"], item["summary"], item["current_versions"], item["version_added"], item["url"],item["details"], item["timestamp"]  ])
         
-        print("Successfully created the CSV log file: " + fileName)
+        logger.log_print("Successfully created the CSV log file: " + fileName)
 
         return True
 
@@ -53,6 +56,6 @@ class Csv_Logger :
         try:
             os.makedirs(path)
         except OSError:
-            print("Creation of the directory %s failed" % path)
+            logger.log_print("Creation of the directory %s failed" % path)
         else :
-            print("Successfully created the directory %s" % path)
+            logger.log_print("Successfully created the directory %s" % path)

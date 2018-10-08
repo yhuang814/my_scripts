@@ -1,4 +1,6 @@
 import requests, json
+from sys_logger import Sys_Logger
+logger = Sys_Logger()
 
 class Jira : 
     def __init__(self, jira_config):
@@ -12,8 +14,8 @@ class Jira :
         request_url = "https://borngroup.atlassian.net/rest/api/2/issue/" + ticket_id
 
         #test
-        print("Updating ticket " + ticket_id + " to version " + version + " ...")
-        print("Request URL: " + request_url)
+        logger.log_print("Updating ticket " + ticket_id + " to version " + version + " ...")
+        logger.log_print("Request URL: " + request_url)
         
         body = {
             "update": {
@@ -29,15 +31,15 @@ class Jira :
         try:
             response = requests.put(request_url, data=json.dumps(body), headers=headers, auth=(username, password))
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            print("Update Failed.")
-            print("JIRA UPDATE API ERROR: " + e)
+            logger.log_print("Update Failed.")
+            logger.log_print("JIRA UPDATE API ERROR: " + e)
             return False
 
         if(response.status_code == 204) :
-            print("Update completed.")
+            logger.log_print("Update completed.")
             return True
         else : 
-            print("Update Failed - Status Code: " + response.status_code)
+            logger.log_print("Update Failed - Status Code: " + response.status_code)
             return False
 
     def get_ticket_versions(self, ticket_id) :

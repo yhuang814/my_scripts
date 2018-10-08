@@ -3,4 +3,5 @@ commits_report/config.json
 .vscode/
 fs_report/test_data/*
 commits_report/logs/*
+commits_report/reports/*
 *.pyc

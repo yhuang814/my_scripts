@@ -2,6 +2,9 @@ import re, os, json
 from jira_rest import Jira
 from config import Config
 
+from sys_logger import Sys_Logger
+logger = Sys_Logger()
+
 class Ticket_Helper : 
     def __init__(self):
         self.config = Config() #config class to provide config.json file data
@@ -57,8 +60,8 @@ class Ticket_Helper :
         return
     def get_failed_tickets(self, ticket_list, check_version) :
         failed_tickets = {}
-        print("Checking fix version: " + check_version)
-        print("Checking " + str(len(ticket_list)) + " tickets...")
+        logger.log_print("Checking fix version: " + check_version)
+        logger.log_print("Checking " + str(len(ticket_list)) + " tickets...")
 
         for key in ticket_list: 
             ticket = ticket_list[key]
@@ -89,12 +92,12 @@ class Ticket_Helper :
                 }
             
             if "error" in result and result["error"] is True:
-                print(result["message"] + " - Ticket: " + key)
+                logger.log_print(result["message"] + " - Ticket: " + key)
             else : 
-                print(result["message"] + " - Ticket: " + key + " - Versions: " + " ".join(api_result["fix_versions"]))
+                logger.log_print(result["message"] + " - Ticket: " + key + " - Versions: " + " ".join(api_result["fix_versions"]))
         
-        print("TOTAL PASSED: " + str(len(ticket_list) - len(failed_tickets)))
-        print("TOTAL FAILED: " + str(len(failed_tickets)))
+        logger.log_print("TOTAL PASSED: " + str(len(ticket_list) - len(failed_tickets)))
+        logger.log_print("TOTAL FAILED: " + str(len(failed_tickets)))
         return failed_tickets
     
     def update_ticket(self, ticket_id, version) : 
