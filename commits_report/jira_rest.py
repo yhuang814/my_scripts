@@ -9,13 +9,17 @@ class Jira :
         username = jira_config['username']
         password = jira_config['password']
 
-        request_url = "https://borngroup.atlassian.net/rest/api/2/issue/CNV-3481"
+        request_url = "https://borngroup.atlassian.net/rest/api/2/issue/" + ticket_id
+
+        #test
+        print("Updating ticket " + ticket_id + " to version " + version + " ...")
+        print("Request URL: " + request_url)
         
         body = {
             "update": {
                     "fixVersions": [{
                         "add": {
-                            "name": "0.17.2"
+                            "name": version
                         }
                     }]
                 }
@@ -25,12 +29,15 @@ class Jira :
         try:
             response = requests.put(request_url, data=json.dumps(body), headers=headers, auth=(username, password))
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            print("lol" + e)
-            exit()
+            print("Update Failed.")
+            print("JIRA UPDATE API ERROR: " + e)
+            return False
 
         if(response.status_code == 204) :
+            print("Update completed.")
             return True
         else : 
+            print("Update Failed - Status Code: " + response.status_code)
             return False
 
     def get_ticket_versions(self, ticket_id) :

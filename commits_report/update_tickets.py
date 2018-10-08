@@ -12,14 +12,16 @@ config = Config() #config class to provide config.json file data
 prompt = Prompt()
 
 def prompt_handler(message) : 
-    if prompt.confirm(message) == False : 
-        print("Aborting operation....")
-        exit()
+    prompt_result = prompt.confirm(message)
+
+    if prompt_result == True : 
+        return True
+    print("Aborting operation....")
+    exit()    
 
 def main():    
 
     parser = argparse.ArgumentParser()
-
     parser.add_argument(
         '--start',
         default=None,
@@ -59,18 +61,22 @@ def main():
     print("Fix Version: " + args.version)
     prompt_handler("Please confirm the above.")
 
-    check_version = args.version
+    #version number to be updated JIRA tickets.
+    current_version = args.version
 
     ticket_helper = Ticket_Helper()
     
+    #list of commits exist in B and not A using git expression A..B
     commits = ticket_helper.get_commits(compare)
+
+    #group commits to ticket using ticket number as the unique key 
     ticket_list = ticket_helper.get_grouped_tickets(commits)
-    failed_tickets = ticket_helper.get_failed_tickets(ticket_list, check_version)
 
-    print("=================================================================")
-    print("====================FAILED TICKETS===============================")
-    print("=================================================================")
+    #REST API call to JIRA to verify if each tickets contain 'current_version' in the list of ticket fix versions
+    failed_tickets = ticket_helper.get_failed_tickets(ticket_list, current_version)
 
+    #Print list of failed tickets and its commits.
+    print("========================== FAILED TICKETS =========================")    
     for ticket_key in failed_tickets:
         ticket = failed_tickets[ticket_key]["data"]
         commit_count = len(ticket)
@@ -78,12 +84,15 @@ def main():
         for commit in ticket : 
             print("+" + commit["commit"] + " - " + commit["author"] )
     
-    csv_logger = Csv_Logger(check_version)
+    csv_logger = Csv_Logger(current_version)
     csv_logger.log(failed_tickets)
 
-    
-    prompt_result = prompt.confirm("Are you sure you want to update above tickets to fix version " + check_version)
-    print(prompt_result)
+    print("=============================== END ===============================")    
+
+    if prompt_handler("Are you sure you want to update above tickets to fix version " + current_version) :
+        for ticket_key in failed_tickets:
+            ticket_helper.update_ticket(ticket_key, current_version)
+            #TODO: add logging to csv when this returns true
 
 if __name__ == '__main__':
     	main()
