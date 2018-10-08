@@ -96,7 +96,7 @@ def main():
             if ticket_helper.update_ticket(ticket_key, current_version) : 
                 updated_ticket = failed_tickets[ticket_key]
                 ticket_id = ticket_key
-                ticket_summary = updated_ticket["summary"]
+                ticket_summary = updated_ticket["summary"].encode("utf-8")
                 ticket_current_versions = updated_ticket["versions"]
                 ticket_added_version = current_version
                 ticket_url = ticket_helper.get_jira_url(ticket_id) #TODO: add line break without breaking the csv format
