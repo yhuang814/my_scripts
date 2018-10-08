@@ -99,3 +99,12 @@ class Ticket_Helper :
     
     def update_ticket(self, ticket_id, version) : 
         return self.jira.update_ticket_version(ticket_id, version)
+    
+    #retrieve the store front JIRA ticket URL
+    def get_jira_url(self, ticket_id) :
+        base_url = self.config.get_base_url()
+        if base_url and ticket_id : 
+            return base_url + "/browse/" + ticket_id
+        return ''
+        
+        

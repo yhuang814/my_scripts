@@ -1,40 +1,53 @@
 import csv
 import os.path
 from time import strftime
+import datetime
 
 class Csv_Logger :
     
     def __init__(self, fix_version):
         self.fix_version = fix_version
+        self.write_items = []
 
-    def log(self, tickets):
+    #TODO: implement error handling
+    def log(self) : 
         script_dir = os.path.dirname(os.path.realpath(__file__))
         log_dir = script_dir + '/logs'
 
         if not os.path.isdir(log_dir) : 
             self.make_directory(log_dir)
 
-        timestamp = strftime("%m%d%Y_%H%M%S")
+        file_creation_timestamp = strftime("%m%d%Y_%H%M%S")
 
-        fileName = log_dir + '/log_' + timestamp + ".csv"
+        fileName = log_dir + '/log_' + file_creation_timestamp + ".csv"
+
+        print("Creating csv log file...")
 
         with open(fileName, 'wb') as csvfile:
-            filewriter = csv.writer(csvfile, delimiter=',',
-                                    quotechar=' ', quoting=csv.QUOTE_MINIMAL)
+            filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_ALL)
             #header
-            filewriter.writerow(['Ticket','Summary', 'Current Versions', 'Version Added', 'Details'])
+            filewriter.writerow(['Ticket','Summary', 'Current Versions', 'Version Added', 'Ticket URL', 'Details', 'Updated Time'])
+            
+            for item in self.write_items :
+                filewriter.writerow( [item["ticket_id"], item["summary"], item["current_versions"], item["version_added"], item["url"],item["details"], item["timestamp"]  ])
+        
+        print("Successfully created the CSV log file: " + fileName)
 
-            #content
-            for ticket_key in tickets : 
-                ticket = tickets[ticket_key]
-                self.write_row(filewriter, ticket)
+        return True
 
-    def write_row(self, filewriter, ticket) :             
-        commits = [] #add all commit id and author into array
-        for commit in ticket["data"]:
-            commits.append(commit["commit"] + " - " + commit["author"])
-                    
-        filewriter.writerow( [ticket["id"], "\"" + ticket['summary'] + "\"", ticket["versions"], self.fix_version, ''])
+    def add(self, ticket_id, summary, current_versions, version_added, url, details) :       
+        timestamp = datetime.datetime.now()
+        write_item = {
+            "timestamp" : timestamp,
+            "ticket_id" : ticket_id,
+            "summary" : summary,
+            "current_versions" : current_versions,
+            "version_added" : version_added,
+            "url" : url,
+            "details" : details
+        }
+        self.write_items.append(write_item)
+        
 
     def make_directory(self, path):
         try:

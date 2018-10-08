@@ -75,6 +75,9 @@ def main():
     #REST API call to JIRA to verify if each tickets contain 'current_version' in the list of ticket fix versions
     failed_tickets = ticket_helper.get_failed_tickets(ticket_list, current_version)
 
+    #test
+    csv_logger = Csv_Logger(current_version)
+
     #Print list of failed tickets and its commits.
     print("========================== FAILED TICKETS =========================")    
     for ticket_key in failed_tickets:
@@ -83,16 +86,27 @@ def main():
         print(ticket_key + " - Commits: " + str(commit_count))
         for commit in ticket : 
             print("+" + commit["commit"] + " - " + commit["author"] )
-    
-    csv_logger = Csv_Logger(current_version)
-    csv_logger.log(failed_tickets)
 
     print("=============================== END ===============================")    
 
     if prompt_handler("Are you sure you want to update above tickets to fix version " + current_version) :
         for ticket_key in failed_tickets:
-            ticket_helper.update_ticket(ticket_key, current_version)
-            #TODO: add logging to csv when this returns true
+            if ticket_helper.update_ticket(ticket_key, current_version) : 
+                updated_ticket = failed_tickets[ticket_key]
+                ticket_id = ticket_key
+                ticket_summary = updated_ticket["summary"]
+                ticket_current_versions = updated_ticket["versions"]
+                ticket_added_version = current_version
+                ticket_url = ticket_helper.get_jira_url(ticket_id) #TODO: add line break without breaking the csv format
+                ticket_details = []
+                for commit in updated_ticket["data"] : 
+                    ticket_details.append("+" + commit["commit"] + " - " + commit["author"] + "\n")
+                csv_logger.add(ticket_id, ticket_summary, ticket_current_versions, ticket_added_version, ticket_url, "".join(ticket_details) )
+            else :
+                print("ERROR: Unable to update ticket " + ticket_key)
+    
+    #logs the file
+    csv_logger.log()
 
 if __name__ == '__main__':
     	main()
