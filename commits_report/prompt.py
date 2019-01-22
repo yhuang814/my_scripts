@@ -31,7 +31,7 @@ class Prompt :
             if not ans:
                 return resp
             if ans not in ['y', 'Y', 'n', 'N']:
-                print('please enter y or n.')
+                print 'please enter y or n.'
                 continue
             if ans == 'y' or ans == 'Y':
                 return True
